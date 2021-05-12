@@ -66,6 +66,7 @@ func (rw *responseWriter) WriteHeader(code int) {
 }
 
 // LoggingMiddleware logs the incoming HTTP request & its duration.
+// https://blog.questionable.services/article/guide-logging-middleware-go/
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
