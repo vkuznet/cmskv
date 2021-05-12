@@ -82,6 +82,18 @@ func StoreHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// InfoHandler fetches key-value pair from DB
+func InfoHandler(w http.ResponseWriter, r *http.Request) {
+	rec := make(map[string]string)
+	rec["server"] = Info()
+	data, err := json.Marshal(rec)
+	if err != nil {
+		log.Fatalf("Fail to marshal records, %v", err)
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
+}
+
 // FetchHandler fetches key-value pair from DB
 func FetchHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"runtime"
 	"strings"
 	"time"
 
@@ -33,11 +34,23 @@ func basePath(s string) string {
 	return s
 }
 
+// version of the code
+var version string
+
+// Info function returns version string of the server
+func Info() string {
+	goVersion := runtime.Version()
+	tstamp := time.Now().Format("2006-02-01")
+	return fmt.Sprintf("git=%s go=%s date=%s", version, goVersion, tstamp)
+}
+
+// helper function which provides all handler routes
 func handlers() *mux.Router {
 	router := mux.NewRouter()
 	router.StrictSlash(true) // to allow /route and /route/ end-points
 
 	// visible routes
+	router.HandleFunc(basePath("/info"), InfoHandler).Methods("GET")
 	router.HandleFunc(basePath("/store"), StoreHandler).Methods("POST")
 	router.HandleFunc(basePath("/fetch/{key:.*}"), FetchHandler).Methods("GET")
 

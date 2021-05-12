@@ -7,7 +7,9 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"os"
 	"time"
 
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
@@ -16,9 +18,14 @@ import (
 func main() {
 	var config string
 	flag.StringVar(&config, "config", "config.json", "server config file")
-	var verbose int
-	flag.IntVar(&verbose, "verbose", 0, "Verbose level, support 0,1,2")
+	var version bool
+	flag.BoolVar(&version, "version", false, "Show version")
 	flag.Parse()
+	if version {
+		fmt.Println(Info())
+		os.Exit(0)
+
+	}
 	err := parseConfig(config)
 	if err != nil {
 		log.Fatalf("Unable to parse config file %s, error: %v", config, err)
