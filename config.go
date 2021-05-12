@@ -15,6 +15,7 @@ type Configuration struct {
 	BadgerDB      string `json:"db"`       // db file name
 	LimiterPeriod string `json:"rate"`     // github.com/ulule/limiter rate value
 	LogFile       string `json:"log_file"` // server log file
+	SHA           string `json:"sha"`      // sha version: sha1, sha256, sha512
 }
 
 // Config variable represents configuration object

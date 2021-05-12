@@ -2,11 +2,15 @@ package main
 
 import (
 	"crypto/sha1"
+	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"hash"
 	"log"
 	"net/http"
+	"strings"
 
 	badger "github.com/dgraph-io/badger/v3"
 	"github.com/gorilla/mux"
@@ -44,7 +48,15 @@ func StoreHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create hash value for given key
-	h := sha1.New()
+	var h hash.Hash
+	sha := strings.ToLower(Config.SHA)
+	if sha == "sha256" {
+		h = sha256.New()
+	} else if sha == "sha512" {
+		h = sha512.New()
+	} else {
+		h = sha1.New()
+	}
 	h.Write([]byte(rec.Key))
 	rec.Value = hex.EncodeToString(h.Sum(nil))
 
