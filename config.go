@@ -8,14 +8,13 @@ import (
 
 // Configuration stores server configuration parameters
 type Configuration struct {
-	Port             int    `json:"port"`               // server port number
-	Base             string `json:"base"`               // base URL
-	Verbose          int    `json:"verbose"`            // verbose output
-	UTC              bool   `json:"utc"`                // report logger time in UTC
-	PrintMonitRecord bool   `json:"print_monit_record"` // print monit record on stdout
-	BadgerDB         string `json:"db"`                 // db file name
-	LimiterPeriod    string `json:"rate"`               // github.com/ulule/limiter rate value
-	LogFile          string `json:"log_file"`           // server log file
+	Port          int    `json:"port"`     // server port number
+	Base          string `json:"base"`     // base URL
+	Verbose       int    `json:"verbose"`  // verbose output
+	UTC           bool   `json:"utc"`      // report logger time in UTC
+	BadgerDB      string `json:"db"`       // db file name
+	LimiterPeriod string `json:"rate"`     // github.com/ulule/limiter rate value
+	LogFile       string `json:"log_file"` // server log file
 }
 
 // Config variable represents configuration object
@@ -42,6 +41,12 @@ func parseConfig(configFile string) error {
 	if err != nil {
 		log.Println("Unable to parse", err)
 		return err
+	}
+	if Config.Port == 0 {
+		Config.Port = 8212
+	}
+	if Config.BadgerDB == "" {
+		Config.BadgerDB = "/tmp/badger.db"
 	}
 	if Config.LimiterPeriod == "" {
 		Config.LimiterPeriod = "100-S"
