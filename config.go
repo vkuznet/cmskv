@@ -43,7 +43,7 @@ func parseConfig(configFile string) error {
 		return err
 	}
 	if Config.Port == 0 {
-		Config.Port = 8212
+		Config.Port = 9212
 	}
 	if Config.BadgerDB == "" {
 		Config.BadgerDB = "/tmp/badger.db"
