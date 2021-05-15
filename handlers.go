@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
+	_ "embed"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -22,6 +23,12 @@ type Record struct {
 	Value string `json:"value"`
 }
 
+// HTTPRecord represents key-value pair
+type HTTPRecord struct {
+	Sha string `json:"sha"`
+	Record
+}
+
 // helper function to handle http server errors
 func handleError(w http.ResponseWriter, r *http.Request, msg string, err error) {
 	log.Println(msg, err)
@@ -33,13 +40,14 @@ func handleError(w http.ResponseWriter, r *http.Request, msg string, err error) 
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	w.WriteHeader(http.StatusBadRequest)
 	w.Write(data)
 }
 
 // StoreHandler stores given key value pair in DB
 func StoreHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	var rec Record
+	var rec HTTPRecord
 	err := json.NewDecoder(r.Body).Decode(&rec)
 	if err != nil {
 		msg := "unable to marshal server settings"
@@ -50,15 +58,19 @@ func StoreHandler(w http.ResponseWriter, r *http.Request) {
 	// create hash value for given key
 	var h hash.Hash
 	sha := strings.ToLower(Config.SHA)
-	if sha == "sha256" {
+	if sha == "sha256" || rec.Sha == "sha256" {
 		h = sha256.New()
-	} else if sha == "sha512" {
+	} else if sha == "sha512" || rec.Sha == "sha512" {
 		h = sha512.New()
 	} else {
 		h = sha1.New()
 	}
 	h.Write([]byte(rec.Key))
-	rec.Value = hex.EncodeToString(h.Sum(nil))
+	// if record value is not provided we'll create a hash for it
+	// this will allow to anonimise the data
+	if rec.Value == "" {
+		rec.Value = hex.EncodeToString(h.Sum(nil))
+	}
 
 	// commit new key-value records into our store
 	txn := DB.NewTransaction(true)
@@ -128,4 +140,14 @@ func FetchHandler(w http.ResponseWriter, r *http.Request) {
 		handleError(w, r, msg, err)
 		return
 	}
+}
+
+var (
+	//go:embed static/index.html
+	index string
+)
+
+// IndexHandler fetches key-value pair from DB
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte(index))
 }
