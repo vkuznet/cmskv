@@ -58,6 +58,7 @@ jobs:
         curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/cmskv/Dockerfile
         curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/cmskv/run.sh
         curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/cmskv/config.json
+        chmod +x run.sh
         sed -i -e "s,ENV TAG=.*,ENV TAG=${{steps.get-ref.outputs.tag}},g" Dockerfile
         docker build . --tag docker.pkg.github.com/vkuznet/cmskv/cmskv
       
