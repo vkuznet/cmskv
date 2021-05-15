@@ -72,7 +72,7 @@ func loggingMiddleware(next http.Handler) http.Handler {
 		defer func() {
 			if err := recover(); err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				log.Printf("error %v\nstack %v\n", err, debug.Stack())
+				log.Printf("error %v\nstack %v\n", err, string(debug.Stack()))
 			}
 		}()
 		if r.Method == "POST" {
