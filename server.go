@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"runtime"
-	"strings"
 	"time"
 
 	_ "expvar"         // to be used for monitoring, see https://github.com/divan/expvarmon
@@ -21,19 +20,6 @@ var StartTime time.Time
 // DB represents our DB
 var DB *badger.DB
 
-func basePath(s string) string {
-	if Config.Base != "" {
-		if strings.HasPrefix(s, "/") {
-			s = strings.Replace(s, "/", "", 1)
-		}
-		if strings.HasPrefix(Config.Base, "/") {
-			return fmt.Sprintf("%s/%s", Config.Base, s)
-		}
-		return fmt.Sprintf("/%s/%s", Config.Base, s)
-	}
-	return s
-}
-
 // version of the code
 var version string
 
@@ -48,11 +34,21 @@ func Info() string {
 func handlers() *mux.Router {
 	router := mux.NewRouter()
 	router.StrictSlash(true) // to allow /route and /route/ end-points
-
 	// visible routes
-	router.HandleFunc(basePath("/info"), InfoHandler).Methods("GET")
-	router.HandleFunc(basePath("/store"), StoreHandler).Methods("POST")
-	router.HandleFunc(basePath("/fetch/{key:.*}"), FetchHandler).Methods("GET")
+	if Config.Base == "" {
+		router.HandleFunc("/info", InfoHandler).Methods("GET")
+		router.HandleFunc("/store", StoreHandler).Methods("POST")
+		router.HandleFunc("/fetch/{key:.*}", FetchHandler).Methods("GET")
+		router.HandleFunc("/", IndexHandler).Methods("GET")
+	} else {
+		subrouter := router.PathPrefix(Config.Base).Subrouter()
+		subrouter.StrictSlash(true) // to allow /route and /route/ end-points
+		subrouter.HandleFunc("/info", InfoHandler).Methods("GET")
+		subrouter.HandleFunc("/store", StoreHandler).Methods("POST")
+		subrouter.HandleFunc("/fetch/{key:.*}", FetchHandler).Methods("GET")
+		subrouter.HandleFunc("/", IndexHandler).Methods("GET")
+
+	}
 
 	// use various middlewares
 	router.Use(limitMiddleware)
