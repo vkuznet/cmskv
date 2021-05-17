@@ -60,10 +60,13 @@ func StoreHandler(w http.ResponseWriter, r *http.Request) {
 	sha := strings.ToLower(Config.SHA)
 	if sha == "sha256" || rec.Sha == "sha256" {
 		h = sha256.New()
+		rec.Sha = "sha256"
 	} else if sha == "sha512" || rec.Sha == "sha512" {
 		h = sha512.New()
+		rec.Sha = "sha512"
 	} else {
 		h = sha1.New()
+		rec.Sha = "sha1"
 	}
 	h.Write([]byte(rec.Key))
 	// if record value is not provided we'll create a hash for it
@@ -104,6 +107,12 @@ func StoreHandler(w http.ResponseWriter, r *http.Request) {
 	if Config.Verbose > 0 {
 		log.Printf("record key=%s value=%s", rec.Value, rec.Key)
 	}
+	data, err := json.Marshal(rec)
+	if err != nil {
+		msg := "unable to marshal record"
+		handleError(w, r, msg, err)
+	}
+	w.Write(data)
 }
 
 // InfoHandler fetches key-value pair from DB

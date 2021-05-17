@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"runtime"
+	"strings"
 	"time"
 
 	_ "expvar"         // to be used for monitoring, see https://github.com/divan/expvarmon
@@ -41,8 +42,12 @@ func handlers() *mux.Router {
 		router.HandleFunc("/fetch/{key:.*}", FetchHandler).Methods("GET")
 		router.HandleFunc("/", IndexHandler).Methods("GET")
 	} else {
-		subrouter := router.PathPrefix(Config.Base).Subrouter()
-		subrouter.StrictSlash(true) // to allow /route and /route/ end-points
+		base := Config.Base
+		if !strings.HasSuffix(base, "/") {
+			base = fmt.Sprintf("%s/", Config.Base)
+		}
+		subrouter := router.PathPrefix(base).Subrouter()
+		//         subrouter.StrictSlash(true) // to allow /route and /route/ end-points
 		subrouter.HandleFunc("/info", InfoHandler).Methods("GET")
 		subrouter.HandleFunc("/store", StoreHandler).Methods("POST")
 		subrouter.HandleFunc("/fetch/{key:.*}", FetchHandler).Methods("GET")
@@ -73,9 +78,9 @@ func server() {
 	defer DB.Close()
 
 	// the request handler
-	base := fmt.Sprintf("%s", Config.Base)
-	if base == "" {
-		base = "/"
+	base := Config.Base
+	if !strings.HasSuffix(base, "/") {
+		base = fmt.Sprintf("%s/", Config.Base)
 	}
 
 	// set our handlers

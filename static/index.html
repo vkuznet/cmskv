@@ -1,5 +1,57 @@
 <html>
+<style type="text/css" media="all">
+body {
+    width: 70%
+    margin:0;
+    margin-left:20px;
+    margin-right:20px;
+    padding:0;
+    color:#000;
+    background:#fff;
+    font-size: 14px;
+    font:13px/1.231 arial,helvetica,sans-serif;
+}
+#center {
+    padding-left: 100px;
+}
+    
+</style>
 <body>
-    Index page for cmskv
+    <div id="center">
+    <h1>CMS key-value store</h1>
+    The CMS key-value store service provides a convenient way
+    to store either key-value pair or anonymise given key. It supports the following APIs:
+    <<ul>
+        <li>/store</li> to store given key or key-value pair via POST request
+        <li>/fetch</li> to fetch given key or value from the store via GET request
+    </ul>
+    <h3>Examples:</h3>
+    Store given key-value pair
+    <pre>
+        curl -H "Content-type: application/json" -d'{"key":"test", "value":"bla"}' https://cmsweb.cern.ch/cmskv/store
+        # it returns the following JSON with your key-value pair
+        {"sha":"sha1","key":"test","value":"bla"}
+    </pre>
+    <br />
+    Store given key
+    <pre>
+        curl -H "Content-type: application/json" -d'{"key":"foo"}' https://cmsweb.cern.ch/cmskv/store
+        # it returns the following JSON with anonymised value for your key
+        {"sha":"sha1","key":"foo","value":"0beec7b5ea3f0fdbc95d0dd47f3c5bc275da8a33"}
+    </pre>
+    <br />
+    Fetch given key value
+    <pre>
+        curl https://cmsweb.cern.ch/cmskv/fetch/foo
+        # it returns your key-value pair
+        {"key":"foo","value":"0beec7b5ea3f0fdbc95d0dd47f3c5bc275da8a33"}
+    </pre>
+    Fetch given value (reverse look-up):
+    <pre>
+        curl https://cmsweb.cern.ch/cmskv/fetch/0beec7b5ea3f0fdbc95d0dd47f3c5bc275da8a33
+        # it returns your key-value pair
+        {"key":"0beec7b5ea3f0fdbc95d0dd47f3c5bc275da8a33","value":"foo"}
+    </pre>
+    </div>
 </body>
 </html>
